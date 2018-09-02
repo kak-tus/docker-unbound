@@ -1,0 +1,52 @@
+server:
+  statistics-interval: 300
+  num-threads: 8
+  interface: 0.0.0.0
+  access-control: 0.0.0.0/0 allow
+  do-not-query-localhost: no
+  domain-insecure: "consul"
+  domain-insecure: "dd"
+  interface-automatic: yes
+  rrset-roundrobin: yes
+
+stub-zone:
+  name: "consul"
+  stub-addr: {{ if service "consul-dns" }}
+    {{- range $s := service "consul-dns~_agent" | toJSON | plugin "rttfix" | parseJSON }}
+      {{- if not ( scratch.Key "addr1" ) }}
+        {{- scratch.Set "addr1" "1" }}
+        {{- $s.Address }}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $dc := datacenters true }}
+      {{- range $s := $dc | printf "consul-dns@%s" | service | toJSON | plugin "rttfix" | parseJSON }}
+        {{- if not ( scratch.Key "addr2" ) }}
+          {{- scratch.Set "addr2" "1" }}
+          {{- $s.Address }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}@{{ if service "consul-dns" }}
+    {{- range $s := service "consul-dns~_agent" | toJSON | plugin "rttfix" | parseJSON }}
+      {{- if not ( scratch.Key "port1" ) }}
+        {{- scratch.Set "port1" "1" }}
+        {{- $s.Port }}
+      {{- end }}
+    {{- end }}
+  {{- else }}
+    {{- range $dc := datacenters true }}
+      {{- range $s := $dc | printf "consul-dns@%s" | service | toJSON | plugin "rttfix" | parseJSON }}
+        {{- if not ( scratch.Key "port2" ) }}
+          {{- scratch.Set "port2" "1" }}
+          {{- $s.Port }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+{{ if env "DC_NAME" | printf "config/dns/dc-%s" | keyExists }}
+forward-zone:
+  name: "dd"
+  forward-addr: {{ env "DC_NAME" | printf "config/dns/dc-%s" | key }}
+{{ end }}
