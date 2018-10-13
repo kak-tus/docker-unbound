@@ -8,8 +8,6 @@ server:
   domain-insecure: "dd"
   interface-automatic: yes
   rrset-roundrobin: yes
-  val-permissive-mode: yes
-  module-config: "iterator"
 
 stub-zone:
   name: "consul"

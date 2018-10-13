@@ -22,13 +22,16 @@ RUN \
   && echo -n "$RTTFIX_SHA256  rttfix" | sha256sum -c - \
   && chmod +x rttfix
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 RUN \
   apk add --no-cache \
     unbound \
   \
-  && echo 'include: "/etc/unbound/unbound.conf.d/local.conf"' >> /etc/unbound/unbound.conf
+  && echo 'include: "/etc/unbound/unbound.conf.d/local.conf"' >> /etc/unbound/unbound.conf \
+  \
+  # Update DNSSEC keys
+  && ( /usr/sbin/unbound-anchor ; echo 'ok' )
 
 COPY --from=build /usr/local/bin/rttfix /usr/local/bin/rttfix
 COPY --from=build /usr/local/bin/consul-template /usr/local/bin/consul-template
