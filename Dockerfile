@@ -26,6 +26,7 @@ FROM alpine:3.8
 
 RUN \
   apk add --no-cache \
+    bind-tools \
     unbound \
   \
   && echo 'include: "/etc/unbound/unbound.conf.d/local.conf"' >> /etc/unbound/unbound.conf \
