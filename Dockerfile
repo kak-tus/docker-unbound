@@ -1,3 +1,12 @@
+FROM golang:1.10.3-alpine3.8 AS go-build
+
+WORKDIR /go/src/github.com/kak-tus/docker-unbound/check
+
+COPY check/vendor ./vendor
+COPY check/main.go .
+
+RUN go install
+
 FROM alpine:3.8 AS build
 
 ENV \
@@ -26,7 +35,6 @@ FROM alpine:3.8
 
 RUN \
   apk add --no-cache \
-    bind-tools \
     unbound \
   \
   && echo 'include: "/etc/unbound/unbound.conf.d/local.conf"' >> /etc/unbound/unbound.conf \
@@ -38,11 +46,15 @@ COPY --from=build /usr/local/bin/rttfix /usr/local/bin/rttfix
 COPY --from=build /usr/local/bin/consul-template /usr/local/bin/consul-template
 COPY templates /root/templates
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --from=go-build /go/bin/check /usr/local/bin/check
+COPY check/etc /etc/
 
 ENV \
   CONSUL_HTTP_ADDR= \
   CONSUL_TOKEN= \
   \
   DC_NAME=
+
+EXPOSE 53 9000
 
 CMD ["/usr/local/bin/entrypoint.sh"]
