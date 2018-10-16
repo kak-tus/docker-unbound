@@ -1,5 +1,5 @@
 healthcheck:
-  listen: ':9000'
+  listen: ':${CHECK_PORT}'
 
 log:
   tag: unbound.check
