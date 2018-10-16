@@ -23,6 +23,7 @@
   name = "github.com/iph0/conf"
   packages = [
     ".",
+    "envconf",
     "fileconf"
   ]
   revision = "188f0d99c5f922af4da3fd4132a2711160f10253"
@@ -80,6 +81,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f3a7cf97c8ceff49a49d472c6ad43899ad09ee21534058669a387b801f96c8b3"
+  inputs-digest = "c00a3e7bd4ebb01df72615f17f474e2c08fd1e9661ba18a0281ba85679d4d367"
   solver-name = "gps-cdcl"
   solver-version = 1
