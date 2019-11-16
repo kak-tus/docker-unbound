@@ -1,0 +1,2 @@
+healthcheck:
+  listen: ':${CHECK_PORT}'

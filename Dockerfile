@@ -1,13 +1,16 @@
-FROM golang:1.10.3-alpine3.8 AS go-build
+FROM golang:1.13.2-alpine3.10 AS go-build
 
-WORKDIR /go/src/github.com/kak-tus/docker-unbound/check
+WORKDIR /go/docker-unbound
 
-COPY check/vendor ./vendor
-COPY check/main.go .
+COPY *.go ./
+COPY go.mod .
+COPY go.sum .
+
+ENV CGO_ENABLED=0
 
 RUN go test && go build -o /go/bin/check
 
-FROM alpine:3.8 AS build
+FROM alpine:3.10 AS build
 
 ENV \
   CONSUL_TEMPLATE_VERSION=0.19.4 \
@@ -24,7 +27,7 @@ RUN \
   && unzip consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip \
   && rm consul-template_${CONSUL_TEMPLATE_VERSION}_linux_amd64.zip
 
-FROM alpine:3.8
+FROM alpine:3.10
 
 RUN \
   apk add --no-cache \
@@ -39,7 +42,7 @@ COPY --from=build /usr/local/bin/consul-template /usr/local/bin/consul-template
 COPY templates /root/templates
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY --from=go-build /go/bin/check /usr/local/bin/check
-COPY check/etc /etc/
+COPY etc /etc/
 
 ENV \
   CHECK_PORT=9000 \
