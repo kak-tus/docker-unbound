@@ -1,4 +1,4 @@
-FROM golang:1.13.2-alpine3.10 AS go-build
+FROM golang:1.17.6-alpine3.15 AS go-build
 
 WORKDIR /go/docker-unbound
 
@@ -8,11 +8,9 @@ COPY go.sum .
 
 ENV CGO_ENABLED=0
 
-RUN go test && go build -o /go/bin/check
+RUN go build -o /go/bin/check
 
-FROM hashicorp/consul-template:0.27.2 AS build
-
-FROM alpine:3.10
+FROM alpine:3.15
 
 RUN \
   apk add --no-cache \
@@ -23,17 +21,11 @@ RUN \
   # Update DNSSEC keys
   && ( /usr/sbin/unbound-anchor ; echo 'ok' )
 
-COPY --from=build /bin/consul-template /usr/local/bin/consul-template
-COPY templates /root/templates
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY --from=go-build /go/bin/check /usr/local/bin/check
-COPY etc /etc/
 
 ENV \
-  CHECK_PORT=9000 \
-  UNBOUND_FORWARD_ZONE= \
-  UNBOUND_LOCAL_DATA= \
-  UNBOUND_STUB_ZONE=
+  CHECK_LISTEN=0.0.0.0:9000
 
 EXPOSE 53 9000
 

@@ -5,10 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/iph0/conf"
-	"github.com/iph0/conf/envconf"
-	"github.com/iph0/conf/fileconf"
 	"github.com/kak-tus/healthcheck"
+	"github.com/kelseyhightower/envconfig"
 	"go.uber.org/zap"
 )
 
@@ -20,32 +18,12 @@ func main() {
 
 	log := logger.Sugar()
 
-	fileLdr := fileconf.NewLoader("etc", "/etc")
-	envLdr := envconf.NewLoader()
-
-	configProc := conf.NewProcessor(
-		conf.ProcessorConfig{
-			Loaders: map[string]conf.Loader{
-				"file": fileLdr,
-				"env":  envLdr,
-			},
-		},
-	)
-
-	configRaw, err := configProc.Load(
-		"file:check.yml",
-		"env:^CHECK_",
-	)
-
-	if err != nil {
-		log.Panic(err)
-	}
-
 	var cnf struct {
 		Listen string
 	}
 
-	if err := conf.Decode(configRaw["healthcheck"], &cnf); err != nil {
+	err = envconfig.Process("CHECK", &cnf)
+	if err != nil {
 		log.Panic(err)
 	}
 
