@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+/usr/sbin/unbound-anchor
+
 /usr/local/bin/check &
 
 unbound -d &
