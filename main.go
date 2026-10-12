@@ -26,13 +26,31 @@ func main() {
 		log.Panic().Err(err).Msg("config read fail")
 	}
 
+	log.Debug().Msg("start update certs")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+
+	cmd := exec.CommandContext(ctx, "/usr/sbin/unbound-anchor")
+
+	if err := cmd.Run(); err != nil {
+		log.Error().Err(err).Msg("update certs failed")
+	}
+
+	cancel()
+
+	log.Debug().Msg("done update certs")
+
 	ticker := time.NewTicker(time.Hour * 24 * 7)
 
 	go func() {
 		for range ticker.C {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 
-			_ = exec.CommandContext(ctx, "/usr/sbin/unbound-anchor")
+			cmd := exec.CommandContext(ctx, "/usr/sbin/unbound-anchor")
+
+			if err := cmd.Run(); err != nil {
+				log.Error().Err(err).Msg("update certs failed")
+			}
 
 			cancel()
 		}
