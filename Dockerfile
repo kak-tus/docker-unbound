@@ -1,4 +1,4 @@
-FROM golang:1.17.6-alpine3.15 AS go-build
+FROM golang:1.27.2-alpine3.24 AS go-build
 
 WORKDIR /go/docker-unbound
 
