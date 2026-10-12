@@ -10,7 +10,7 @@ ENV CGO_ENABLED=0
 
 RUN go build -o /go/bin/check
 
-FROM alpine:3.15
+FROM alpine:3.24.2
 
 RUN \
   apk add --no-cache \
